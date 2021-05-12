@@ -5,11 +5,11 @@ const User = mongoose.model("User")
 
 module.exports = (req,res,next)=>{
    const {authorization} =req.headers
-    //authorization === mnmnm token
+    //authorization === blog token
    if(!authorization){
        res.status(401).json({error:"you must be loggin!"})
    }
-   const token = authorization.replace("mnmn ", "")
+   const token = authorization.replace("blog ", "")
    jwt.verify(token, JWT_secrt, (err,payload)=>{
        if(err){
            res.status(401).json({error:"you must be login!"})

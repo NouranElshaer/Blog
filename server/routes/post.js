@@ -47,8 +47,6 @@ router.get('/myposts',requireLogin,(req,res)=>{
         res.json({myposts})
         console.log(req.user)
     })        
-    .populate("postedBy","_id name")
-    .populate("comments.postedBy","_id name")
     .catch(err=>{
         console.log(err)
     })

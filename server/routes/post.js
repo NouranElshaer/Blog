@@ -7,9 +7,11 @@ const Post = mongoose.model('Post')
 
 router.get('/allposts',requireLogin,(req,res)=>{
     Post.find().populate('postedBy','name')
+    .populate("comments.postedBy","_id name")
     .then(posts=>{
         res.json({posts})
     })
+    
     .catch(err=>{
         console.log(err)
     })
@@ -44,7 +46,9 @@ router.get('/myposts',requireLogin,(req,res)=>{
     .then(myposts=>{
         res.json({myposts})
         console.log(req.user)
-    })
+    })        
+    .populate("postedBy","_id name")
+    .populate("comments.postedBy","_id name")
     .catch(err=>{
         console.log(err)
     })
@@ -55,7 +59,10 @@ router.put('/like',requireLogin,(req,res)=>{
     $push:{likes:req.user._id}
     },{
         new:true
-    }).exec((err,result)=>{
+    })
+    .populate("postedBy","_id name")
+    .populate("comments.postedBy","_id name")
+    .exec((err,result)=>{
         if(err){
             return res.status(422).json({error:err})
         }else{
@@ -72,7 +79,10 @@ router.put('/like',requireLogin,(req,res)=>{
             $pull:{likes:req.user._id}
         },{
             new:true
-        }).exec((err,result)=>{
+        })
+        .populate("postedBy","_id name")
+        .populate("comments.postedBy","_id name")
+        .exec((err,result)=>{
             if(err){
                 return res.status(422).json({error:err})
             }else{
@@ -103,7 +113,24 @@ router.put('/like',requireLogin,(req,res)=>{
         })
     })
 
-
+    router.delete('/deletepost/:postId',requireLogin,(req,res)=>{
+        Post.findOne({_id:req.params.postId})
+        .populate("postedBy","_id name")
+        .exec((err,post)=>{
+            if(err || !post){
+                return res.status(422).json({error:err})
+            }
+            if(post.postedBy._id.toString() === req.user._id.toString()){
+                post.remove()
+                .then(result=>{
+                    // res.json({message:"Successfully Deleted"})
+                    res.json(result)
+                }).catch(err=>{
+                    console.log(err)
+                })
+            }
+        })
+    })
 
 
 
